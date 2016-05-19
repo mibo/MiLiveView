@@ -27,6 +27,13 @@
 
 package hello
 
+import java.io.ByteArrayOutputStream
+import java.nio.file.{Files, Paths}
+
+import net.sourceforge.plantuml.{FileFormat, FileFormatOption, SourceStringReader}
+
+import scala.io.Source
+import scala.reflect.io.Path
 import scalafx.application.JFXApp
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.geometry.Insets
@@ -40,10 +47,11 @@ import scalafx.scene.web.WebView
 
 object ScalaFXHelloWorld extends JFXApp {
 
-
+  val filePath = parameters.named.getOrElse("file", "File parameter (--file=...) is not available")
 
   stage = new PrimaryStage {
     //    initStyle(StageStyle.Unified)
+
     title = "mi Live View"
     scene = new Scene {
       fill = Color.White
@@ -51,10 +59,7 @@ object ScalaFXHelloWorld extends JFXApp {
         padding = Insets(5, 10, 5, 10)
         children = Seq(
           new Text {
-//            System.out.println("Raw: " + parameters.raw)
-//            System.out.println("Unnamed: " + parameters.unnamed)
-//            System.out.println("Named: " + parameters.named)
-            text = parameters.named.getOrElse("file", "File parameter (--file=...) is not available")
+            text = filePath
             style = "-fx-font: normal 12pt sans-serif"
           },
 
@@ -67,7 +72,19 @@ object ScalaFXHelloWorld extends JFXApp {
 
   def webView(): WebView = {
     new WebView() {
-      engine.loadContent("<html><head/><body><h1>TEST</h1></body></html>")
+      engine.loadContent(loadPuml())
+    }
+  }
+
+  def loadPuml(): String = {
+    if(Files.exists(Paths.get(filePath))) {
+      val os = new ByteArrayOutputStream()
+      val content = Source.fromFile(filePath).mkString
+      val reader: SourceStringReader = new SourceStringReader(content)
+      val desc: String = reader.generateImage(os, new FileFormatOption(FileFormat.SVG))
+      os.toString("utf-8")
+    } else {
+      "<html><head/><body><h1>Fail</h1><br/>File at path '" + filePath + "' does not exists.</body></html>"
     }
   }
 }

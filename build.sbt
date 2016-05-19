@@ -5,7 +5,10 @@ version := "1.0"
 scalaVersion := "2.11.8"
 
 // Add dependency on ScalaFX library
-libraryDependencies += "org.scalafx" %% "scalafx" % "8.0.92-R10"
+libraryDependencies ++= Seq(
+  "org.scalafx" %% "scalafx" % "8.0.92-R10",
+  "net.sourceforge.plantuml" % "plantuml" % "8040"
+)
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-Xcheckinit", "-encoding", "utf8", "-feature")
 
