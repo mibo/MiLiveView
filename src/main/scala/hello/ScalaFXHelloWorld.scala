@@ -67,7 +67,7 @@ object ScalaFXHelloWorld extends JFXApp {
 
   def webView(): WebView = {
     new WebView() {
-      engine.load("http://www.heise.de")
+      engine.loadContent("<html><head/><body><h1>TEST</h1></body></html>")
     }
   }
 }
