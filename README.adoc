@@ -1,0 +1,7 @@
+= mibo Live View (miLiVi)
+
+A very simple tool to check modifications for a file and render a live preview (`asciidoc` or `markdown`).
+
+== Start
+
+Start with `sbt "run --file=<path to file>"` to build and run live view for given file.
