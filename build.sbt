@@ -7,7 +7,8 @@ scalaVersion := "2.11.8"
 // Add dependency on ScalaFX library
 libraryDependencies ++= Seq(
   "org.scalafx" %% "scalafx" % "8.0.92-R10",
-  "net.sourceforge.plantuml" % "plantuml" % "8040"
+  "net.sourceforge.plantuml" % "plantuml" % "8040",
+  "org.asciidoctor" % "asciidoctorj" % "1.5.4"
 )
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-Xcheckinit", "-encoding", "utf8", "-feature")

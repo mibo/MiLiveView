@@ -27,10 +27,12 @@
 
 package hello
 
-import java.io.ByteArrayOutputStream
+import java.io.{ByteArrayOutputStream, File}
 import java.nio.file.{Files, Paths}
 
 import net.sourceforge.plantuml.{FileFormat, FileFormatOption, SourceStringReader}
+import org.asciidoctor.Asciidoctor.Factory
+import org.asciidoctor.Options
 
 import scala.io.Source
 import scala.reflect.io.Path
@@ -72,19 +74,34 @@ object ScalaFXHelloWorld extends JFXApp {
 
   def webView(): WebView = {
     new WebView() {
-      engine.loadContent(loadPuml())
+      engine.loadContent(loadContent())
     }
   }
 
-  def loadPuml(): String = {
+  def loadContent(): String = {
     if(Files.exists(Paths.get(filePath))) {
-      val os = new ByteArrayOutputStream()
-      val content = Source.fromFile(filePath).mkString
-      val reader: SourceStringReader = new SourceStringReader(content)
-      val desc: String = reader.generateImage(os, new FileFormatOption(FileFormat.SVG))
-      os.toString("utf-8")
-    } else {
-      "<html><head/><body><h1>Fail</h1><br/>File at path '" + filePath + "' does not exists.</body></html>"
+      if(filePath.endsWith("puml")) {
+        return loadPuml()
+      } else if(filePath.endsWith("adoc")) {
+        return loadAdoc()
+      }
     }
+    "<html><head/><body><h1>Fail</h1><br/>File at path '" + filePath + "' does not exists.</body></html>"
+  }
+
+  def loadPuml(): String = {
+    val os = new ByteArrayOutputStream()
+    val content = Source.fromFile(filePath).mkString
+    val reader: SourceStringReader = new SourceStringReader(content)
+    val desc: String = reader.generateImage(os, new FileFormatOption(FileFormat.SVG))
+    os.toString("utf-8")
+  }
+
+  def loadAdoc(): String = {
+    val asciidoctor = Factory.create()
+    val options = new Options()
+    options.setToFile(false)
+    val htmlContent = asciidoctor.convertFile(new File(filePath), options)
+    return htmlContent
   }
 }

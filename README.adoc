@@ -5,3 +5,7 @@ A very simple tool to check modifications for a file and render a live preview (
 == Start
 
 Start with `sbt "run --file=<path to file>"` to build and run live view for given file.
+
+== Dependencies
+
+  * link:http://asciidoctor.org/docs/asciidoctorj/[asciidoctorj]
