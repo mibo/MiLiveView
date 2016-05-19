@@ -29,6 +29,7 @@ package hello
 
 import java.io.{ByteArrayOutputStream, File}
 import java.nio.file.{Files, Paths}
+import java.util.Date
 
 import net.sourceforge.plantuml.{FileFormat, FileFormatOption, SourceStringReader}
 import org.asciidoctor.Asciidoctor.Factory
@@ -36,7 +37,7 @@ import org.asciidoctor.Options
 
 import scala.io.Source
 import scala.reflect.io.Path
-import scalafx.application.JFXApp
+import scalafx.application.{JFXApp, Platform}
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.geometry.Insets
 import scalafx.scene.Scene
@@ -51,6 +52,15 @@ object ScalaFXHelloWorld extends JFXApp {
 
   val filePath = parameters.named.getOrElse("file", "File parameter (--file=...) is not available")
 
+  val updatedText = new Text {
+    text = new Date().toString
+  }
+  val webContentView = new WebView() {
+    engine.loadContent(loadContent())
+  }
+
+  var lastLoadedTime:Long = -1
+
   stage = new PrimaryStage {
     //    initStyle(StageStyle.Unified)
 
@@ -59,24 +69,59 @@ object ScalaFXHelloWorld extends JFXApp {
       fill = Color.White
       content = new VBox {
         padding = Insets(5, 10, 5, 10)
+
         children = Seq(
-          new Text {
-            text = filePath
-            style = "-fx-font: normal 12pt sans-serif"
+          new HBox {
+            children = Seq(
+              new Text {
+                text = filePath
+                style = "-fx-font: normal 12pt sans-serif"
+              },
+              updatedText
+            )
           },
 
-          webView()
+          webContentView
         )
       }
     }
-
   }
 
-  def webView(): WebView = {
-    new WebView() {
-      engine.loadContent(loadContent())
+  startTask
+
+  def reload():Unit = {
+    while(true) {
+      Platform.runLater({
+        if(checkForUpdate()) {
+          lastLoadedTime = System.currentTimeMillis()
+          updatedText.text = new Date().toString
+          webContentView.engine.loadContent(loadContent())
+          System.out.println("Reloaded at '" + updatedText.text + "'....")
+        }
+      })
+      Thread.sleep(2000)
     }
   }
+
+  def startTask = {
+    val backgroundThread = new Thread {
+      setDaemon(true)
+      override def run = {
+        reload()
+      }
+    }
+    backgroundThread.start()
+  }
+
+  def checkForUpdate(): Boolean = {
+    val file = Paths.get(filePath)
+    if(Files.exists(file)) {
+      val lastModified = Files.getLastModifiedTime(file)
+      return lastLoadedTime < lastModified.toMillis
+    }
+    false
+  }
+
 
   def loadContent(): String = {
     if(Files.exists(Paths.get(filePath))) {
@@ -101,7 +146,6 @@ object ScalaFXHelloWorld extends JFXApp {
     val asciidoctor = Factory.create()
     val options = new Options()
     options.setToFile(false)
-    val htmlContent = asciidoctor.convertFile(new File(filePath), options)
-    return htmlContent
+    asciidoctor.convertFile(new File(filePath), options)
   }
 }

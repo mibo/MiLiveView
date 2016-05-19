@@ -8,4 +8,5 @@ Start with `sbt "run --file=<path to file>"` to build and run live view for give
 
 == Dependencies
 
+  * link:plantuml[PlantUML]
   * link:http://asciidoctor.org/docs/asciidoctorj/[asciidoctorj]
