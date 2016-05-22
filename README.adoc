@@ -11,6 +11,12 @@ Start with `sbt "run --file=<path to file>"` to build and run live view for give
 To build a executable (_fat_) `jar` just run `sbt assembly`. This build the jar in `target/scala-2.11` as `MiLiVi-assembly-1.0.jar`.
  This can be executed with a `JRE 1.8+`.
 
+=== Java Packager
+
+See link:https://docs.oracle.com/javase/8/docs/technotes/tools/unix/javapackager.html[official documentation] for more details.
+
+Use:: Run `java_packager_gen.sh` to generate a `all-in` bundle in `target/bundle`. This contains all (also JRE) which is necessary to run the application.
+
 == Dependencies
 
   * link:plantuml[PlantUML]
