@@ -6,6 +6,11 @@ A very simple tool to check modifications for a file and render a live preview (
 
 Start with `sbt "run --file=<path to file>"` to build and run live view for given file.
 
+== Building
+
+To build a executable (_fat_) `jar` just run `sbt assembly`. This build the jar in `target/scala-2.11` as `MiLiVi-assembly-1.0.jar`.
+ This can be executed with a `JRE 1.8+`.
+
 == Dependencies
 
   * link:plantuml[PlantUML]
