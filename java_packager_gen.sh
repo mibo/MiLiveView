@@ -6,7 +6,7 @@ if [ ! -z $1 ]; then
 fi
 
 APP_NAME=MiLiveView
-APP_CLASS=hello.ScalaFXHelloWorld
+APP_CLASS=de.mirb.milivi.MiLiveViewApp
 SRC_DIR=$ROOT_DIR/target/scala-2.11
 SRC_FILE=MiLiVi-assembly-1.0.jar
 OUT_DIR=$ROOT_DIR/target/
