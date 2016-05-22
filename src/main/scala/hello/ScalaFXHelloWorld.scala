@@ -34,6 +34,7 @@ import java.util.Date
 import net.sourceforge.plantuml.{FileFormat, FileFormatOption, SourceStringReader}
 import org.asciidoctor.Asciidoctor.Factory
 import org.asciidoctor.Options
+import org.pegdown.{Extensions, LinkRenderer, PegDownProcessor, ToHtmlSerializer}
 
 import scala.io.Source
 import scala.reflect.io.Path
@@ -58,16 +59,14 @@ object ScalaFXHelloWorld extends JFXApp {
   val webContentView = new WebView() {
     engine.loadContent(loadContent())
   }
-
   var lastLoadedTime:Long = -1
 
   stage = new PrimaryStage {
     //    initStyle(StageStyle.Unified)
-
     title = "mi Live View"
     scene = new Scene {
       fill = Color.White
-      content = new VBox {
+      root = new VBox {
         padding = Insets(5, 10, 5, 10)
 
         children = Seq(
@@ -87,7 +86,9 @@ object ScalaFXHelloWorld extends JFXApp {
     }
   }
 
-  startTask
+  startTask()
+
+  //
 
   def reload():Unit = {
     while(true) {
@@ -103,10 +104,10 @@ object ScalaFXHelloWorld extends JFXApp {
     }
   }
 
-  def startTask = {
+  def startTask() = {
     val backgroundThread = new Thread {
       setDaemon(true)
-      override def run = {
+      override def run() = {
         reload()
       }
     }
@@ -129,9 +130,20 @@ object ScalaFXHelloWorld extends JFXApp {
         return loadPuml()
       } else if(filePath.endsWith("adoc")) {
         return loadAdoc()
+      } else if(filePath.endsWith("md") || filePath.endsWith("markdown")) {
+        return loadMarkdown()
       }
     }
     "<html><head/><body><h1>Fail</h1><br/>File at path '" + filePath + "' does not exists.</body></html>"
+  }
+
+  def loadMarkdown(): String = {
+    val content = Source.fromFile(filePath).mkString
+    val rootNode = new PegDownProcessor(
+      Extensions.AUTOLINKS | Extensions.WIKILINKS | Extensions.FENCED_CODE_BLOCKS | Extensions.TABLES | Extensions.HARDWRAPS
+    ).parseMarkdown(content.toCharArray)
+    val serializer = new ToHtmlSerializer(new LinkRenderer())
+    serializer.toHtml(rootNode)
   }
 
   def loadPuml(): String = {
