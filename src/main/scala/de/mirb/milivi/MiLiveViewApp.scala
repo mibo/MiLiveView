@@ -1,8 +1,11 @@
 package de.mirb.milivi
 
-import java.io.{ByteArrayOutputStream, File}
+import java.io.{ByteArrayOutputStream, File, FileReader, IOException}
+import java.nio.CharBuffer
 import java.nio.file.{Files, Paths}
 import java.util.Date
+import javafx.event.{ActionEvent, EventHandler}
+import javafx.stage.FileChooser
 
 import net.sourceforge.plantuml.{FileFormat, FileFormatOption, SourceStringReader}
 import org.asciidoctor.Asciidoctor.Factory
@@ -13,8 +16,9 @@ import scala.io.Source
 import scala.reflect.io.Path
 import scalafx.application.{JFXApp, Platform}
 import scalafx.application.JFXApp.PrimaryStage
-import scalafx.geometry.Insets
+import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.Scene
+import scalafx.scene.control.Button
 import scalafx.scene.effect.DropShadow
 import scalafx.scene.layout.{HBox, VBox}
 import scalafx.scene.paint.Color._
@@ -24,12 +28,26 @@ import scalafx.scene.web.WebView
 
 object MiLiveViewApp extends JFXApp {
 
-  val filePath = parameters.named.getOrElse("file", "File parameter (--file=...) is not available")
+  var filePath = parameters.named.getOrElse("file", "File parameter (--file=...) is not available")
 
+  val textFilePath = new Text {
+    text = filePath
+    style = "-fx-font: normal 12pt sans-serif"
+  }
   val updatedText = new Text {
     text = new Date().toString
+    alignmentInParent = Pos.CenterRight
+  }
+  val buttonLoadFile = new Button {
+    text = "Open"
+    onAction = new EventHandler[ActionEvent] {
+      override def handle(event: ActionEvent): Unit = {
+        loadFile()
+      }
+    }
   }
   val webContentView = new WebView() {
+
     engine.loadContent(loadContent())
   }
   var lastLoadedTime:Long = -1
@@ -45,14 +63,11 @@ object MiLiveViewApp extends JFXApp {
         children = Seq(
           new HBox {
             children = Seq(
-              new Text {
-                text = filePath
-                style = "-fx-font: normal 12pt sans-serif"
-              },
+              textFilePath,
+              buttonLoadFile,
               updatedText
             )
           },
-
           webContentView
         )
       }
@@ -62,6 +77,44 @@ object MiLiveViewApp extends JFXApp {
   startTask()
 
   //
+
+  def loadFile(): Unit = {
+    val fileChooser: FileChooser = new FileChooser
+    val homeDir: File = new File(System.getProperty("user.home"))
+    fileChooser.setInitialDirectory(homeDir)
+
+    val file: File = fileChooser.showOpenDialog(stage)
+    if (file != null) {
+      filePath = file.getAbsolutePath
+      textFilePath.text = filePath
+      lastLoadedTime = -1
+      checkForUpdate()
+
+//      try {
+//        val b: StringBuilder = new StringBuilder
+//        val reader: FileReader = new FileReader(file)
+//        val cap: Int = 1024
+//        var readCount: Int = 0
+//        while (readCount >= 0) {
+//          {
+//            val buffer: CharBuffer = CharBuffer.allocate(cap)
+//            readCount = reader.read(buffer)
+//            buffer.flip
+//            b.append(buffer.toString)
+//            buffer.clear
+//          }
+//        }
+//        inputArea.setText(b.toString)
+//        loadedFile = file
+//        updatePreview
+//      }
+//      catch {
+//        case ex: IOException => {
+//          System.out.println("Error during file export with message: {}", ex.getMessage, ex)
+//        }
+//      }
+    }
+  }
 
   def reload():Unit = {
     while(true) {
