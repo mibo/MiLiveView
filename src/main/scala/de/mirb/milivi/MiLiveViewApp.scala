@@ -1,7 +1,7 @@
 package de.mirb.milivi
 
 import java.io.{ByteArrayOutputStream, File}
-import java.nio.file.{Files, Paths}
+import java.nio.file.Files
 import java.util.Date
 import javafx.event.{ActionEvent, EventHandler}
 import javafx.stage.FileChooser
@@ -25,10 +25,10 @@ import scalafx.scene.web.WebView
 
 object MiLiveViewApp extends JFXApp {
 
-  var filePath = parameters.named.getOrElse("file", "File parameter (--file=...) is not available")
+  var filePath = new File(parameters.named.getOrElse("file", System.getProperty("user.home")))
 
   val textFilePath = new Text {
-    text = filePath
+    text = filePath.getAbsolutePath
     style = "-fx-font: normal 12pt sans-serif"
   }
   val updatedText = new Text {
@@ -99,13 +99,12 @@ object MiLiveViewApp extends JFXApp {
 
   def loadFile(): Unit = {
     val fileChooser: FileChooser = new FileChooser
-    val homeDir: File = new File(System.getProperty("user.home"))
-    fileChooser.setInitialDirectory(homeDir)
+    fileChooser.setInitialDirectory(filePath.getParentFile)
 
     val file: File = fileChooser.showOpenDialog(stage)
     if (file != null) {
-      filePath = file.getAbsolutePath
-      textFilePath.text = filePath
+      filePath = file
+      textFilePath.text = filePath.getAbsolutePath
       lastLoadedTime = -1
       reload()
     }
@@ -140,9 +139,8 @@ object MiLiveViewApp extends JFXApp {
   }
 
   def checkForUpdate(): Boolean = {
-    val file = Paths.get(filePath)
-    if(Files.exists(file)) {
-      val lastModified = Files.getLastModifiedTime(file)
+    if(Files.exists(filePath.toPath)) {
+      val lastModified = Files.getLastModifiedTime(filePath.toPath)
       return lastLoadedTime < lastModified.toMillis
     }
     false
@@ -150,12 +148,13 @@ object MiLiveViewApp extends JFXApp {
 
 
   def loadContent(): String = {
-    if(Files.exists(Paths.get(filePath))) {
-      if(filePath.endsWith("puml")) {
+    if(Files.exists(filePath.toPath)) {
+      val filename = filePath.getName
+      if(filename.endsWith("puml")) {
         return loadPuml()
-      } else if(filePath.endsWith("adoc")) {
+      } else if(filename.endsWith("adoc")) {
         return loadAdoc()
-      } else if(filePath.endsWith("md") || filePath.endsWith("markdown")) {
+      } else if(filename.endsWith("md") || filename.endsWith("markdown")) {
         return loadMarkdown()
       }
     }
@@ -183,6 +182,6 @@ object MiLiveViewApp extends JFXApp {
     val asciidoctor = Factory.create()
     val options = new Options()
     options.setToFile(false)
-    asciidoctor.convertFile(new File(filePath), options)
+    asciidoctor.convertFile(filePath, options)
   }
 }
