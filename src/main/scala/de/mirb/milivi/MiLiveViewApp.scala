@@ -14,9 +14,10 @@ import org.pegdown.{Extensions, LinkRenderer, PegDownProcessor, ToHtmlSerializer
 import scala.io.Source
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.application.{JFXApp, Platform}
+import scalafx.collections.ObservableBuffer
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.Scene
-import scalafx.scene.control.{Button, ToggleButton}
+import scalafx.scene.control._
 import scalafx.scene.layout.{HBox, Priority, VBox}
 import scalafx.scene.paint._
 import scalafx.scene.text.Text
@@ -42,7 +43,6 @@ object MiLiveViewApp extends JFXApp {
       }
     }
   }
-
   val buttonToggleOnTop = new ToggleButton {
     text = "OnTop"
     onAction = new EventHandler[ActionEvent] {
@@ -50,6 +50,10 @@ object MiLiveViewApp extends JFXApp {
         stage.alwaysOnTop = !stage.alwaysOnTop.value
       }
     }
+  }
+  val selectReloadInterval = new ChoiceBox[Int] {
+    items = ObservableBuffer[Int](1 to 10)
+    selectionModel.value.selectFirst()
   }
 
   val webContentView = new WebView() {
@@ -79,6 +83,7 @@ object MiLiveViewApp extends JFXApp {
               textFilePath,
               buttonLoadFile,
               buttonToggleOnTop,
+              selectReloadInterval,
               updatedText
             )
           },
@@ -111,7 +116,7 @@ object MiLiveViewApp extends JFXApp {
       Platform.runLater({
         reload()
       })
-      Thread.sleep(2000)
+      Thread.sleep(selectReloadInterval.getSelectionModel.getSelectedItem * 1000)
     }
   }
 
@@ -120,7 +125,7 @@ object MiLiveViewApp extends JFXApp {
       lastLoadedTime = System.currentTimeMillis()
       updatedText.text = new Date().toString
       webContentView.engine.loadContent(loadContent())
-      System.out.println("Reloaded at '" + updatedText.text + "'....")
+//      System.out.println("Reloaded at '" + updatedText.text + "'....")
     }
   }
 
