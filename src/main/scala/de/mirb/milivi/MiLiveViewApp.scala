@@ -1,7 +1,6 @@
 package de.mirb.milivi
 
-import java.io.{ByteArrayOutputStream, File, FileReader, IOException}
-import java.nio.CharBuffer
+import java.io.{ByteArrayOutputStream, File}
 import java.nio.file.{Files, Paths}
 import java.util.Date
 import javafx.event.{ActionEvent, EventHandler}
@@ -13,15 +12,12 @@ import org.asciidoctor.Options
 import org.pegdown.{Extensions, LinkRenderer, PegDownProcessor, ToHtmlSerializer}
 
 import scala.io.Source
-import scala.reflect.io.Path
-import scalafx.application.{JFXApp, Platform}
 import scalafx.application.JFXApp.PrimaryStage
+import scalafx.application.{JFXApp, Platform}
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.Scene
 import scalafx.scene.control.{Button, ToggleButton}
-import scalafx.scene.effect.DropShadow
-import scalafx.scene.layout.{HBox, VBox}
-import scalafx.scene.paint.Color._
+import scalafx.scene.layout.{HBox, Priority, VBox}
 import scalafx.scene.paint._
 import scalafx.scene.text.Text
 import scalafx.scene.web.WebView
@@ -60,10 +56,13 @@ object MiLiveViewApp extends JFXApp {
     engine.loadContent(loadContent())
     maxHeight = Double.MaxValue
     maxWidth = Double.MaxValue
+    hgrow = Priority.Always
+    vgrow = Priority.Always
   }
   var lastLoadedTime:Long = -1
 
   stage = new PrimaryStage {
+
     title = "mi Live View"
     scene = new Scene {
       fill = Color.White
@@ -74,6 +73,7 @@ object MiLiveViewApp extends JFXApp {
         children = Seq(
           new HBox {
             padding = Insets(5, 10, 5, 10)
+            spacing = 10
 
             children = Seq(
               textFilePath,
