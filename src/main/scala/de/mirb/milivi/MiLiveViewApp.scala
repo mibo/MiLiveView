@@ -18,7 +18,7 @@ import scalafx.application.{JFXApp, Platform}
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.Scene
-import scalafx.scene.control.Button
+import scalafx.scene.control.{Button, ToggleButton}
 import scalafx.scene.effect.DropShadow
 import scalafx.scene.layout.{HBox, VBox}
 import scalafx.scene.paint.Color._
@@ -46,25 +46,39 @@ object MiLiveViewApp extends JFXApp {
       }
     }
   }
-  val webContentView = new WebView() {
 
+  val buttonToggleOnTop = new ToggleButton {
+    text = "OnTop"
+    onAction = new EventHandler[ActionEvent] {
+      override def handle(event: ActionEvent): Unit = {
+        stage.alwaysOnTop = !stage.alwaysOnTop.value
+      }
+    }
+  }
+
+  val webContentView = new WebView() {
     engine.loadContent(loadContent())
+    maxHeight = Double.MaxValue
+    maxWidth = Double.MaxValue
   }
   var lastLoadedTime:Long = -1
 
   stage = new PrimaryStage {
-    //    initStyle(StageStyle.Unified)
     title = "mi Live View"
     scene = new Scene {
       fill = Color.White
+
       root = new VBox {
         padding = Insets(5, 10, 5, 10)
 
         children = Seq(
           new HBox {
+            padding = Insets(5, 10, 5, 10)
+
             children = Seq(
               textFilePath,
               buttonLoadFile,
+              buttonToggleOnTop,
               updatedText
             )
           },
@@ -88,45 +102,25 @@ object MiLiveViewApp extends JFXApp {
       filePath = file.getAbsolutePath
       textFilePath.text = filePath
       lastLoadedTime = -1
-      checkForUpdate()
+      reload()
+    }
+  }
 
-//      try {
-//        val b: StringBuilder = new StringBuilder
-//        val reader: FileReader = new FileReader(file)
-//        val cap: Int = 1024
-//        var readCount: Int = 0
-//        while (readCount >= 0) {
-//          {
-//            val buffer: CharBuffer = CharBuffer.allocate(cap)
-//            readCount = reader.read(buffer)
-//            buffer.flip
-//            b.append(buffer.toString)
-//            buffer.clear
-//          }
-//        }
-//        inputArea.setText(b.toString)
-//        loadedFile = file
-//        updatePreview
-//      }
-//      catch {
-//        case ex: IOException => {
-//          System.out.println("Error during file export with message: {}", ex.getMessage, ex)
-//        }
-//      }
+  def reloadLoop():Unit = {
+    while(true) {
+      Platform.runLater({
+        reload()
+      })
+      Thread.sleep(2000)
     }
   }
 
   def reload():Unit = {
-    while(true) {
-      Platform.runLater({
-        if(checkForUpdate()) {
-          lastLoadedTime = System.currentTimeMillis()
-          updatedText.text = new Date().toString
-          webContentView.engine.loadContent(loadContent())
-          System.out.println("Reloaded at '" + updatedText.text + "'....")
-        }
-      })
-      Thread.sleep(2000)
+    if(checkForUpdate()) {
+      lastLoadedTime = System.currentTimeMillis()
+      updatedText.text = new Date().toString
+      webContentView.engine.loadContent(loadContent())
+      System.out.println("Reloaded at '" + updatedText.text + "'....")
     }
   }
 
@@ -134,7 +128,7 @@ object MiLiveViewApp extends JFXApp {
     val backgroundThread = new Thread {
       setDaemon(true)
       override def run() = {
-        reload()
+        reloadLoop()
       }
     }
     backgroundThread.start()
