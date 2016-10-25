@@ -152,10 +152,12 @@ object MiLiveViewApp extends JFXApp {
       val filename = filePath.getName
       if(filename.endsWith("puml")) {
         return loadPuml()
-      } else if(filename.endsWith("adoc")) {
+      } else if(filename.endsWith("adoc") || filename.endsWith("asciidoc")) {
         return loadAdoc()
       } else if(filename.endsWith("md") || filename.endsWith("markdown")) {
         return loadMarkdown()
+      } else {
+        return "<html><head/><body><h1>Fail</h1><br/>File ending for file '" + filePath + "' is not supported.</body></html>"
       }
     }
     "<html><head/><body><h1>Fail</h1><br/>File at path '" + filePath + "' does not exists.</body></html>"
