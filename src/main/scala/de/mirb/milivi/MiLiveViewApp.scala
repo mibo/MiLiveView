@@ -147,11 +147,13 @@ object MiLiveViewApp extends JFXApp {
   def loadContent(): String = {
     if(Files.exists(Paths.get(filePath))) {
       if(filePath.endsWith("puml")) {
-        return loadPuml()
-      } else if(filePath.endsWith("adoc")) {
-        return loadAdoc()
+        loadPuml()
+      } else if(filePath.endsWith("adoc") || filePath.endsWith("asciidoc")) {
+        loadAdoc()
       } else if(filePath.endsWith("md") || filePath.endsWith("markdown")) {
-        return loadMarkdown()
+        loadMarkdown()
+      } else {
+        "<html><head/><body><h1>Fail</h1><br/>Fileending for file '" + filePath + "' is not supported.</body></html>"
       }
     }
     "<html><head/><body><h1>Fail</h1><br/>File at path '" + filePath + "' does not exists.</body></html>"
