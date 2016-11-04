@@ -8,7 +8,7 @@ fi
 APP_NAME=MiLiveView
 APP_CLASS=de.mirb.milivi.MiLiveViewApp
 SRC_DIR=$ROOT_DIR/target/scala-2.11
-SRC_FILE=MiLiVi-assembly-1.0.jar
+SRC_FILE=MiLiVi-assembly-0.1.jar
 OUT_DIR=$ROOT_DIR/target/
 OUT_FILE=app-result
 
